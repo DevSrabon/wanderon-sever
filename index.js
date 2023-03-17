@@ -43,6 +43,96 @@ async function main() {
         app.get("/backpacking", async (req, res) => { 
             res.send(await upcomingCollection.find({}).toArray());
         })
+// search functionality
+        app.get("/searchone", async (req, res) => {
+					try {
+						if (req.query.pkgName) {
+							let results;
+							if (
+								req.query.pkgName.includes(",") ||
+								req.query.pkgName.includes(" ")
+							) {
+								results = await upcomingCollection
+									.aggregate([
+										{
+											$search: {
+												index: "autocomplete",
+												autocomplete: {
+													query: req.query.pkgName,
+													path: "value",
+													fuzzy: {
+														maxEdits: 1,
+													},
+													tokenOrder: "sequential",
+												},
+											},
+										},
+										{
+											$project: {
+												value: 1,
+												_id: 1,
+												url: 1,
+												imgTitle1: 1,
+												imgTitle2: 1,
+												day: 1,
+												location: 1,
+												pkgName: 1,
+												price: 1,
+												bookDate: 1,
+											},
+										},
+										{
+											$limit: 10,
+										},
+									])
+									.toArray();
+
+								return res.send(results);
+							}
+
+							result = await upcomingCollection
+								.aggregate([
+									{
+										$search: {
+											index: "autocomplete",
+											autocomplete: {
+												query: req.query.pkgName,
+												path: "pkgName",
+												fuzzy: {
+													maxEdits: 1,
+												},
+												tokenOrder: "sequential",
+											},
+										},
+									},
+									{
+										$project: {
+											value: 1,
+											_id: 1,
+											url: 1,
+											imgTitle1: 1,
+											imgTitle2: 1,
+											day: 1,
+											location: 1,
+											pkgName: 1,
+											price: 1,
+											bookDate: 1,
+										},
+									},
+									{
+										$limit: 10,
+									},
+								])
+								.toArray();
+
+							return res.send(result);
+						}
+						res.send([]);
+					} catch (error) {
+						console.error(error);
+						res.send([]);
+					}
+				});
 	} finally {
 	}
 }
