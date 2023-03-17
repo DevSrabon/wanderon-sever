@@ -24,6 +24,7 @@ async function main() {
 	try {
 		const db = client.db("wanderonClone");
 		const upcomingCollection = db.collection("upcoming");
+		const backpackingCollection = db.collection("upcoming");
 
 		app.get("/upcoming", async (req, res) => {
 			const options = req.query.option;
@@ -35,7 +36,10 @@ async function main() {
 					},
 				};
 			}
-			res.send(await upcomingCollection.find(query).toArray());
+            res.send(await upcomingCollection.find(query).toArray());
+            app.get("/backpacking", async (req, res) => { 
+                res.send(await backpackingCollection.find({}).toArray());
+            })
 		});
 	} finally {
 	}
